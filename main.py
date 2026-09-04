@@ -24,8 +24,9 @@ async def on_user_join(event: types.ChatMemberUpdated):
 
 async def main():
     print("Bot is starting...")
+    # مسح الـ Webhook لتفادي التعارض مع Google Apps Script
+    await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
     asyncio.run(main())
-
