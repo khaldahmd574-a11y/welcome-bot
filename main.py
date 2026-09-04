@@ -12,11 +12,20 @@ dp = Dispatcher()
 async def handle_ping(request):
     return web.Response(text="Bot is running perfectly!")
 
+# دالة مستقلة تعنى بانتظار 60 ثانية وحذف الرسالة في الخلفية
+async def delete_message_after_delay(chat_id: int, message_id: int, delay: int = 60):
+    await asyncio.sleep(delay)
+    try:
+        await bot.delete_message(chat_id=chat_id, message_id=message_id)
+        print(f"تم حذف الرسالة {message_id} بنجاح بعد {delay} ثانية.")
+    except Exception as e:
+        print(f"خطأ أثناء حذف الرسالة: {e}")
+
 @dp.chat_member(ChatMemberUpdatedFilter(member_status_changed=JOIN_TRANSITION))
 async def on_user_join(event: types.ChatMemberUpdated):
     user = event.new_chat_member.user
     
-    # عرض اسم العضو كما هو في حسابه تماماً
+    # عرض اسم العضو كما هو
     name = user.full_name or user.first_name or "الضيف"
     
     # نص الترحيب الخاص بك
@@ -27,14 +36,14 @@ async def on_user_join(event: types.ChatMemberUpdated):
     )
     
     try:
-        # إرسال الرسالة
+        # 1. إرسال الرسالة
         msg = await bot.send_message(chat_id=event.chat.id, text=welcome_text)
         
-        # الانتظار دقيقة واحدة (60 ثانية) بالضبط ثم الحذف
-        await asyncio.sleep(60)
-        await bot.delete_message(chat_id=event.chat.id, message_id=msg.message_id)
+        # 2. تشغيل مهمة الحذف في الخلفية بشكل مستقل دون إيقاف البوت
+        asyncio.create_task(delete_message_after_delay(event.chat.id, msg.message_id, 60))
+        
     except Exception as e:
-        print(f"حدث خطأ أثناء الترحيب أو الحذف: {e}")
+        print(f"حدث خطأ أثناء إرسال الترحيب: {e}")
 
 async def main():
     print("Bot is starting...")
