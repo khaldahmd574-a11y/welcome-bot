@@ -14,22 +14,32 @@ async def handle_ping(request):
 
 @dp.chat_member(ChatMemberUpdatedFilter(member_status_changed=JOIN_TRANSITION))
 async def on_user_join(event: types.ChatMemberUpdated):
-    user_name = event.new_chat_member.user.first_name
-    welcome_text = f"أهلاً بك يا {user_name} في المجموعة! 👋"
+    user = event.new_chat_member.user
     
-    msg = await bot.send_message(chat_id=event.chat.id, text=welcome_text)
+    # عرض اسم العضو كما هو في حسابه تماماً
+    name = user.full_name or user.first_name or "الضيف"
     
-    await asyncio.sleep(60)
+    # نص الترحيب الخاص بك
+    welcome_text = (
+        f"✨ يا هلا بـ {name} 🤍\n"
+        f"🌷 نورت/ي وشرفت/ي، حياك الله بيننا 🙏🏻\n"
+        f"🤍 سعداء بخدمتك دائمًا ✨"
+    )
+    
     try:
+        # إرسال الرسالة
+        msg = await bot.send_message(chat_id=event.chat.id, text=welcome_text)
+        
+        # الانتظار دقيقة واحدة (60 ثانية) بالضبط ثم الحذف
+        await asyncio.sleep(60)
         await bot.delete_message(chat_id=event.chat.id, message_id=msg.message_id)
     except Exception as e:
-        print(f"Error deleting message: {e}")
+        print(f"حدث خطأ أثناء الترحيب أو الحذف: {e}")
 
 async def main():
     print("Bot is starting...")
     await bot.delete_webhook(drop_pending_updates=True)
     
-    # تشغيل خادم الويب على المنفذ المطلوب لـ Render
     app = web.Application()
     app.router.add_get("/", handle_ping)
     runner = web.AppRunner(app)
@@ -38,7 +48,6 @@ async def main():
     site = web.TCPSite(runner, "0.0.0.0", port)
     await site.start()
     
-    # بدء استقبال التحديثات
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
