@@ -32,10 +32,11 @@ async def on_user_join(event: types.ChatMemberUpdated):
     user = event.new_chat_member.user
     name = user.full_name or user.first_name or "مستخدم"
     
+    # نص الترحيب الجديد والمخصص
     welcome_text = (
-        f"✨ أهلاً بك ({name}) في المجموعه 🤍\n"
-        f"🌷 نورت/ي وشرفت/ي المكان 🙏🏻🌸\n"
-        f"🤍 نورتنا ياحبيبي ✨"
+        f"✨ يا هلا بـ ({name}) 🤍\n"
+        f"🌷 نورت/ي وشرفت/ي، حياك الله بيننا 🙏🏻\n"
+        f"🤍 سعداء بخدمتك دائمًا ✨"
     )
     
     try:
